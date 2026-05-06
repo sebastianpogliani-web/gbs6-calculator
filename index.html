@@ -408,16 +408,16 @@
   <div class="card">
     <div class="card-header">
       <div class="card-header-dot blue"></div>
-      <div class="card-header-title">Vacuna RSV</div>
+      <div class="card-header-title">Vacuna Abrysvo (RSV)</div>
       <div class="card-header-sub">opcional</div>
     </div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.7;">
-      El protocolo requiere <strong style="color:var(--dark)">≥15 días</strong> de separación entre la vacuna RSV y la vacuna del estudio (GBS6), en cualquier orden. Ingresá la fecha si ya fue recibida o está planificada.
+      El protocolo requiere <strong style="color:var(--dark)">≥15 días</strong> de separación entre Abrysvo y la vacuna del estudio (GBS6), en cualquier orden. El último día permitido para Abrysvo es a las <strong style="color:var(--dark)">36+6 semanas</strong>.
     </p>
     <div>
-      <label>Fecha de vacunación RSV</label>
+      <label>Fecha de vacunación Abrysvo</label>
       <input type="date" id="rsv-date" class="blue" oninput="calculate()">
-      <div class="field-note">Dejá vacío para ver solo los escenarios sin RSV</div>
+      <div class="field-note">Dejá vacío para ver solo los escenarios sin Abrysvo</div>
     </div>
   </div>
 
@@ -551,9 +551,13 @@ function calculate() {
   const lastV1 = addDays(today, dTo36);
   const fpp    = addDays(today, 280 - eg);
 
+  // Abrysvo (RSV): last day = when EG reaches 36+6
+  const daysTo366 = daysEg(36,6) - eg;
+  const lastAbrysvo = addDays(today, daysTo366);
+
   renderStats(w, d, today, dTo36, lastV1, fpp, grp, eg);
-  renderRSV(today, rsv, lastV1);
-  renderNarrative(w, d, today, rsv, lastV1, dTo36);
+  renderRSV(today, rsv, lastV1, lastAbrysvo);
+  renderNarrative(w, d, today, rsv, lastV1, dTo36, lastAbrysvo);
   renderVisits(today, lastV1, fpp);
 }
 
@@ -590,7 +594,7 @@ function renderStats(w, d, today, dTo36, lastV1, fpp, grp, eg) {
   `;
 }
 
-function renderRSV(today, rsv, lastV1) {
+function renderRSV(today, rsv, lastV1, lastAbrysvo) {
   const GAP = 15;
   const rsvA1 = addDays(today, GAP);
   const rsvAL = addDays(lastV1, GAP);
@@ -613,12 +617,13 @@ function renderRSV(today, rsv, lastV1) {
       <div class="scenario blue-t anim">
         <div class="scen-head">
           <div class="scen-badge blue">B</div>
-          <div><div class="scen-title">RSV primero → GBS6 después</div><div class="scen-sub">${status}</div></div>
+          <div><div class="scen-title">Abrysvo primero → GBS6 después</div><div class="scen-sub">${status}</div></div>
         </div>
         <div class="scen-rows">
-          <div class="scen-row"><span class="scen-key">💉 Fecha vacuna RSV</span><span class="scen-val blue">${fmt(rsv)}</span></div>
+          <div class="scen-row"><span class="scen-key">💉 Fecha vacuna Abrysvo</span><span class="scen-val blue">${fmt(rsv)}</span></div>
+          <div class="scen-row"><span class="scen-key">🔴 Límite Abrysvo (36+6)</span><span class="scen-val ${rsv > lastAbrysvo ? 'red' : 'green'}">${rsv > lastAbrysvo ? '⛔ Supera 36+6 sem' : fmt(lastAbrysvo)}</span></div>
           <div class="scen-row"><span class="scen-key">⏱ Primer V1 posible (RSV + 15 d)</span><span class="scen-val ${winDays<0?'red':'green'}">${fmt(firstV1)}</span></div>
-          <div class="scen-row"><span class="scen-key">🔚 Último V1 posible (36+0)</span><span class="scen-val">${fmt(lastV1)}</span></div>
+          <div class="scen-row"><span class="scen-key">🔚 Último V1 posible GBS6 (36+0)</span><span class="scen-val">${fmt(lastV1)}</span></div>
           <div class="scen-row"><span class="scen-key">📆 Ventana de V1 resultante</span>
             <span class="scen-val ${winDays<0?'red':'green'}">${winDays<0?'Sin ventana':`${fmt(winStart)} al ${fmt(lastV1)}`}</span>
           </div>
@@ -629,7 +634,7 @@ function renderRSV(today, rsv, lastV1) {
     scenB = `<div class="scenario faded">
       <div class="scen-head">
         <div class="scen-badge blue">B</div>
-        <div><div class="scen-title">RSV primero → GBS6 después</div><div class="scen-sub">Ingresá una fecha RSV para calcular este escenario</div></div>
+        <div><div class="scen-title">Abrysvo primero → GBS6 después</div><div class="scen-sub">Ingresá una fecha Abrysvo para calcular este escenario</div></div>
       </div></div>`;
   }
 
@@ -641,8 +646,9 @@ function renderRSV(today, rsv, lastV1) {
       </div>
       <div class="scen-rows">
         <div class="scen-row"><span class="scen-key">💉 Ventana de V1 (GBS6)</span><span class="scen-val green">Hoy (${fmt(document.getElementById('today').value)}) al ${fmt(lastV1)}</span></div>
-        <div class="scen-row"><span class="scen-key">🔵 RSV mínima si V1 = hoy</span><span class="scen-val blue">${fmt(rsvA1)} en adelante</span></div>
-        <div class="scen-row"><span class="scen-key">🔵 RSV mínima si V1 = último día</span><span class="scen-val blue">${fmt(rsvAL)} en adelante</span></div>
+        <div class="scen-row"><span class="scen-key">🔵 Abrysvo mínima si V1 = hoy</span><span class="scen-val blue">${fmt(rsvA1)} en adelante</span></div>
+        <div class="scen-row"><span class="scen-key">🔵 Abrysvo mínima si V1 = último día</span><span class="scen-val blue">${fmt(rsvAL)} en adelante</span></div>
+        <div class="scen-row"><span class="scen-key">🔴 Último día para Abrysvo (36+6)</span><span class="scen-val red">${fmt(lastAbrysvo)}</span></div>
       </div>
       <div class="feas-ok feas-chip">✅ Siempre factible dentro de la ventana de V1</div>
     </div>
@@ -650,7 +656,7 @@ function renderRSV(today, rsv, lastV1) {
   `;
 }
 
-function renderNarrative(w, d, today, rsv, lastV1, dTo36) {
+function renderNarrative(w, d, today, rsv, lastV1, dTo36, lastAbrysvo) {
   let txt = `Hoy la participante está en <strong>${w}+${d} semanas</strong> de gestación. `;
   txt += `La última fecha posible para la vacunación del estudio (V1) es el <strong>${fmt(lastV1)}</strong> (${dTo36} días). `;
   if (rsv) {
